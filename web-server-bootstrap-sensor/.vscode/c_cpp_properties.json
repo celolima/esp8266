@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:\\Users\\Marcelo\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.4.0\\libraries\\ESP8266mDNS",
+                "C:\\Users\\Marcelo\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
+                "C:\\Users\\Marcelo\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.4.0\\**",
+                "C:\\Users\\Marcelo\\Documents\\Arduino\\libraries\\DHT_sensor_library",
+                "C:\\Users\\Marcelo\\Documents\\Arduino\\libraries\\Adafruit_Sensor"
+            ],
+            "forcedInclude": [],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "C:\\Users\\Marcelo\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
+                    "C:\\Users\\Marcelo\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.4.0\\**"
+                ]
+            },
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 3
+}

@@ -18,7 +18,8 @@ const char MAIN_page[] = R"=====(
         $(function() {
             $('#demo').colorpicker();
         });
-        function sendData(led) {
+        // Change LED Status
+        function setLED(led) {
             var xhttp = new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
@@ -28,13 +29,25 @@ const char MAIN_page[] = R"=====(
             xhttp.open('GET', 'setLED?ledState='+led, true);
             xhttp.send();
         }
-        
+
+        // Change Color Palette Led Strip
+        function setPalette(palette) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById('choosenPalette').innerHTML = this.responseText;
+                }
+            };
+            xhttp.open('GET', 'changePalette?palette='+palette, true);
+            xhttp.send();
+        }
+
         // Call a function repetatively with 2 Second interval
-        setInterval(function() {            
+        setInterval(function() {
             getData("T");
             getData("H");
         }, 2000); //2000mSeconds update rate
-        
+
         function getData(sensor) {
             var xhttp = new XMLHttpRequest();
             let idSensor = sensor === 'T' ? 'temp' : 'humidity';
@@ -54,7 +67,7 @@ const char MAIN_page[] = R"=====(
     <div class='container-fluid'>
         <div class='row'>
             <div class='col-md-12'>
-                <span class='bifs'><h3>Esta&ccedil;&atilde;o de medi&ccedil;&atilde;o de temperatura/umidade</h3><span>
+                <span><h3>Esta&ccedil;&atilde;o de medi&ccedil;&atilde;o de temperatura/umidade</h3><span>
                 <table class='table'>
                     <thead>
                         <tr>
@@ -76,21 +89,82 @@ const char MAIN_page[] = R"=====(
                         </tr>
                     </tbody>
                 </table>
-                <h3>GPIO</h3>
+                <h3>Controle de LED</h3>
                 <div class='row'>
                     <div class='col-md-4'>
-                        <h4 class='text-left'>LED 
+                        <h4 class='text-left'>LED
                             <span class='badge'><td><span id='ledState'>NA</span></td></span>
                         </h4>
                     </div>
                     <div class='col-md-4'>
-                        <button type='button' onclick='sendData(1)' class='btn btn-success btn-lg'>ON</button>
+                        <button type='button' onclick='setLED(1)' class='btn btn-success btn-lg'>ON</button>
                     </div>
-                    <div class='col-md-4'>                        
-                        <button type='button' onclick='sendData(0)' class='btn btn-danger btn-lg'>OFF</button>
+                    <div class='col-md-4'>
+                        <button type='button' onclick='setLED(0)' class='btn btn-danger btn-lg'>OFF</button>
                     </div>
                 </div>
-                <a href="#" class="btn btn-default" id="cp4">Change background color</a>
+                <span><h3>Controle da Fita de LED</h3><span>
+                <div class='row'>
+                    <div class='col-md-4'>
+                        <h4 class='text-left'>Palette Choosen
+                            <span class='badge'><td><span id='choosenPalette'>NA</span></td></span>
+                        </h4>
+                    </div>
+                </div>
+                <div class='row'>
+                    <div class='col-md-12'>
+                        <div class="btn-group" role="group">
+                            <button type='button' onclick='setPalette("cloud")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-cloud" aria-hidden="true"></span>
+                                Cloud
+                            </button>
+                            <button type='button' onclick='setPalette("lava")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-fire" aria-hidden="true"></span>
+                                Lava
+                            </button>
+                            <button type='button' onclick='setPalette("ocean")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-tint" aria-hidden="true"></span>
+                                Ocean
+                            </button>
+                            <button type='button' onclick='setPalette("forest")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-leaf" aria-hidden="true"></span>
+                                Forest
+                            </button>
+                            <button type='button' onclick='setPalette("rainbow")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                                Rainbow
+                            </button>
+                            <button type='button' onclick='setPalette("rainbowStriped")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                                RainbowStriped
+                            </button>
+                            <button type='button' onclick='setPalette("party")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-music" aria-hidden="true"></span>
+                                Party
+                            </button>
+                            <button type='button' onclick='setPalette("heat")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+                                Heat
+                            </button>
+                            <button type='button' onclick='setPalette("random")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                                Random
+                            </button>
+                            <button type='button' onclick='setPalette("shutdown")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+                                Shutdown
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='row'>
+                <div class='col-md-12' style="margin-top: 5px;">
+                    <a href="#" class="btn btn-default" id="cp4">
+                        <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+                        Pick color
+                    </a>
+                </div>>
             </div>
         </div>
     </div>

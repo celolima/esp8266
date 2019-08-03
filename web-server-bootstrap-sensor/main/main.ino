@@ -43,8 +43,7 @@ long previousLEDMillis = 0;
 byte ledState;
 String ledButton = "OFF";
 
-void setup() 
-{
+void setup() {
   Serial.begin(115200);
   Serial.println(" --- Inicializando a aplicação ESP8266 --- ");
   setupLEDStrip();
@@ -53,8 +52,8 @@ void setup()
   dht.begin();
 }
 
-void loop() 
-{
+void loop() {
+  MDNS.update();
   server.handleClient();
 }
 
@@ -77,8 +76,11 @@ void setupWifi() {
   Serial.println(WiFi.localIP()); 
 
   if(WiFi.status() == WL_CONNECTED) { //If WiFi connected to hot spot then start mDNS
-    if (MDNS.begin("shineca.local")) {  //Start mDNS with name esp8266
-      Serial.println("MDNS started");
+    if (!MDNS.begin("neneka")) {
+      Serial.println("Error setting up MDNS responder!");
+      while (1) {
+        delay(1000);
+      }
     }
   }
   
@@ -89,6 +91,8 @@ void setupWifi() {
   server.on("/changePalette", handleChangePalette);
   server.begin();
   Serial.println("HTTP server started");
+
+  MDNS.addService("http", "tcp", 80);
 }
 
 void handleLED() {
@@ -170,7 +174,10 @@ void setupLEDStrip() {
 
 void handleChangePalette() {      
   String choosenPalette = server.arg("palette");
-  
+
+  boolean isPalette = true;
+  int colorChoosen = 0;
+
   if(choosenPalette ==  "cloud") {
       currentPalette = CloudColors_p;
   } else if(choosenPalette ==  "lava") {
@@ -188,25 +195,35 @@ void handleChangePalette() {
   } else if(choosenPalette ==  "heat") {
       currentPalette = HeatColors_p;
   } else if(choosenPalette ==  "blink") {
-      // TODO
+      // 'black out' all 16 palette entries...
+      fill_solid( currentPalette, 16, CRGB::Black);
+      // and set every fourth one to white.
+      currentPalette[0] = CRGB::White;
+      currentPalette[4] = CRGB::White;
+      currentPalette[8] = CRGB::White;
+      currentPalette[12] = CRGB::White;
   } else if(choosenPalette ==  "random") {
       for( int i = 0; i < 16; i++) {
-          currentPalette[i] = CHSV( random8(), 255, random8());
+        currentPalette[i] = CHSV( random8(), 255, random8());
       }
   } else if(choosenPalette ==  "shutdown") {
       fill_solid( currentPalette, 16, CRGB::Black);
   } else {
-      fill_solid( currentPalette, 16, CRGB::Black);
-      Serial.println("Invalid palette");
+      isPalette = false;
+      colorChoosen = (int)strtol(choosenPalette.c_str(), NULL, 16);
   }
 
   uint8_t colorIndex = 1;
   for( int i = 0; i < NUM_LEDS; i++) {
-    leds[i] = ColorFromPalette(currentPalette, colorIndex, BRIGHTNESS, LINEARBLEND);
-    colorIndex += 3;
+    if(isPalette) {
+      leds[i] = ColorFromPalette(currentPalette, colorIndex, BRIGHTNESS, LINEARBLEND);
+      colorIndex += 3;
+    } else {
+      leds[i] = colorChoosen;
+    }    
   }
   
-  Serial.println(choosenPalette);
+  //Serial.println(choosenPalette);
   FastLED.show();
   
   server.send(200, "text/plane", choosenPalette);

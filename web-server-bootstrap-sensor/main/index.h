@@ -11,13 +11,15 @@ const char MAIN_page[] = R"=====(
     <script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/js/bootstrap-colorpicker.min.js'></script>
     <script>
         $(function() {
-            $('#cp4').colorpicker().on('changeColor', function(e) {
-                $('body')[0].style.backgroundColor = e.color.toString('rgba');
+            $('#cp4').colorpicker({hexNumberSignPrefix: false}).on('changeColor', function(e) {
+                document.getElementById('choosenPalette').style.color = e.color.toString('rgba');
+                setPalette(e.color.toString());                
             });
         });
         $(function() {
             $('#demo').colorpicker();
         });
+                
         // Change LED Status
         function setLED(led) {
             var xhttp = new XMLHttpRequest();
@@ -43,10 +45,12 @@ const char MAIN_page[] = R"=====(
         }
 
         // Call a function repetatively with 2 Second interval
+        /*
         setInterval(function() {
             getData("T");
             getData("H");
         }, 2000); //2000mSeconds update rate
+        */
 
         function getData(sensor) {
             var xhttp = new XMLHttpRequest();
@@ -61,48 +65,12 @@ const char MAIN_page[] = R"=====(
             xhttp.send();
         }
     </script>
-    <title>Esta&ccedil;&atilde;o de medi&ccedil;&atilde;o</title>
+    <title>Control Station</title>
 </head>
 <body>
     <div class='container-fluid'>
         <div class='row'>
-            <div class='col-md-12'>
-                <span><h3>Esta&ccedil;&atilde;o de medi&ccedil;&atilde;o de temperatura/umidade</h3><span>
-                <table class='table'>
-                    <thead>
-                        <tr>
-                            <th>Sensor</th>
-                            <th>Medida</th>
-                            <th>Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>DHT22</td>
-                            <td>Temperatura</td>
-                            <td><span id='temp'>0&deg;C</span></td>
-                        </tr>
-                        <tr class='active'>
-                            <td>DHT22</td>
-                            <td>Umidade</td>
-                            <td><span id='humidity'>0%</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <h3>Controle de LED</h3>
-                <div class='row'>
-                    <div class='col-md-4'>
-                        <h4 class='text-left'>LED
-                            <span class='badge'><td><span id='ledState'>NA</span></td></span>
-                        </h4>
-                    </div>
-                    <div class='col-md-4'>
-                        <button type='button' onclick='setLED(1)' class='btn btn-success btn-lg'>ON</button>
-                    </div>
-                    <div class='col-md-4'>
-                        <button type='button' onclick='setLED(0)' class='btn btn-danger btn-lg'>OFF</button>
-                    </div>
-                </div>
+            <div class='col-md-12'>        
                 <span><h3>Controle da Fita de LED</h3><span>
                 <div class='row'>
                     <div class='col-md-4'>
@@ -146,6 +114,10 @@ const char MAIN_page[] = R"=====(
                                 <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
                                 Heat
                             </button>
+                            <button type='button' onclick='setPalette("blink")' class='btn btn-default'>
+                                <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                                Blink
+                            </button>                            
                             <button type='button' onclick='setPalette("random")' class='btn btn-default'>
                                 <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                                 Random
@@ -159,12 +131,56 @@ const char MAIN_page[] = R"=====(
                 </div>
             </div>
             <div class='row'>
-                <div class='col-md-12' style="margin-top: 5px;">
-                    <a href="#" class="btn btn-default" id="cp4">
+                <div class='col-md-12 text-center' style="margin-top: 5px;">
+                    <a href="#" class="btn btn-warning" id="cp4">
                         <span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
                         Pick color
                     </a>
-                </div>>
+                </div>
+            </div>
+        </div>        
+        <div class='row'>
+            <div class='col-md-12'>
+                <span><h3>Controle de medi&ccedil;&atilde;o de temperatura/umidade</h3><span>
+                <table class='table'>
+                    <thead>
+                        <tr>
+                            <th>Sensor</th>
+                            <th>Medida</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>DHT22</td>
+                            <td>Temperatura</td>
+                            <td><span id='temp'>0&deg;C</span></td>
+                        </tr>
+                        <tr class='active'>
+                            <td>DHT22</td>
+                            <td>Umidade</td>
+                            <td><span id='humidity'>0%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class='row'>
+            <div class='col-md-12'>
+                <h3>Controle de LED</h3>
+                <div class='row'>
+                    <div class='col-md-4'>
+                        <h4 class='text-left'>LED
+                            <span class='badge'><td><span id='ledState'>NA</span></td></span>
+                        </h4>
+                    </div>
+                    <div class='col-md-1'>
+                        <button type='button' onclick='setLED(1)' class='btn btn-success btn-sm'>ON</button>
+                    </div>
+                    <div class='col-md-1'>
+                        <button type='button' onclick='setLED(0)' class='btn btn-danger btn-sm'>OFF</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

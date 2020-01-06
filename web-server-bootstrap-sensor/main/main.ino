@@ -39,9 +39,11 @@ ESP8266WebServer server(80);
 
 float t = 0,h = 0;
 
-long previousLEDMillis = 0;
 byte ledState;
 String ledButton = "OFF";
+
+boolean isPalette = true;
+int colorChoosen = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -55,6 +57,7 @@ void setup() {
 void loop() {
   MDNS.update();
   server.handleClient();
+  //showLED();
 }
 
 /*------------------------------------------------------HTTP------------------------------------------------------*/
@@ -147,19 +150,6 @@ void readDHTSensor() {
 }
 /*------------------------------------------------------FIM - SENSOR TEMP-------------------------------------------------*/
 
-void blinkLed(boolean flg) {
-  if(flg) {
-    unsigned long currentMillis = millis();
-    if (currentMillis - previousLEDMillis >= 500) {
-      previousLEDMillis = currentMillis;  
-      ledState = !ledState;
-      digitalWrite(LED_BUILTIN, ledState);
-    }
-  } else {
-    digitalWrite(LED_BUILTIN, LOW);
-  }
-}
-
 void initConnectionsLED() {
   ledState = HIGH;
   pinMode(LED_BUILTIN, OUTPUT);   
@@ -172,11 +162,25 @@ void setupLEDStrip() {
     fill_solid( currentPalette, 16, CRGB::Black);
 }
 
+void showLED() {
+  uint8_t colorIndex = 1;
+  for( int i = 0; i < NUM_LEDS; i++) {
+    if(isPalette) {
+      leds[i] = ColorFromPalette(currentPalette, colorIndex, BRIGHTNESS, LINEARBLEND);
+      colorIndex += 4;
+    } else {
+      leds[i] = colorChoosen;
+    }    
+  }
+  FastLED.show();
+}
+
 void handleChangePalette() {      
   String choosenPalette = server.arg("palette");
-
-  boolean isPalette = true;
-  int colorChoosen = 0;
+  
+  unsigned long currentMillis = 0, previousLEDMillis = 0;
+  isPalette = true;
+  colorChoosen = 0;
 
   if(choosenPalette ==  "cloud") {
       currentPalette = CloudColors_p;
@@ -194,38 +198,29 @@ void handleChangePalette() {
       currentPalette = PartyColors_p;
   } else if(choosenPalette ==  "heat") {
       currentPalette = HeatColors_p;
-  } else if(choosenPalette ==  "blink") {
-      // 'black out' all 16 palette entries...
-      fill_solid( currentPalette, 16, CRGB::Black);
-      // and set every fourth one to white.
-      currentPalette[0] = CRGB::White;
-      currentPalette[4] = CRGB::White;
-      currentPalette[8] = CRGB::White;
-      currentPalette[12] = CRGB::White;
+  } else if(choosenPalette ==  "blink") {    
+    for( int i = 0; i < 200; i++) {
+      fill_solid( currentPalette, NUM_LEDS, CRGB::Red);      
+      showLED();
+      
+      delay(700);
+      
+      fill_solid( currentPalette, NUM_LEDS, CRGB::Black);
+      showLED();
+
+      delay(700);
+    }
   } else if(choosenPalette ==  "random") {
-      for( int i = 0; i < 16; i++) {
+      for( int i = 0; i < NUM_LEDS; i++) {
         currentPalette[i] = CHSV( random8(), 255, random8());
       }
   } else if(choosenPalette ==  "shutdown") {
-      fill_solid( currentPalette, 16, CRGB::Black);
+      fill_solid( currentPalette, NUM_LEDS, CRGB::Black);
   } else {
       isPalette = false;
       colorChoosen = (int)strtol(choosenPalette.c_str(), NULL, 16);
   }
-
-  uint8_t colorIndex = 1;
-  for( int i = 0; i < NUM_LEDS; i++) {
-    if(isPalette) {
-      leds[i] = ColorFromPalette(currentPalette, colorIndex, BRIGHTNESS, LINEARBLEND);
-      colorIndex += 3;
-    } else {
-      leds[i] = colorChoosen;
-    }    
-  }
-  
-  //Serial.println(choosenPalette);
-  FastLED.show();
-  
+  showLED();
   server.send(200, "text/plane", choosenPalette);
 }
 

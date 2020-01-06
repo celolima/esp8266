@@ -94,7 +94,7 @@ const char MAIN_page[] = R"=====(
                                 <span class="glyphicon glyphicon-tint" aria-hidden="true"></span>
                                 Ocean
                             </button>
-                            <button type='button' onclick='setPalette("forest")' class='btn btn-default'>
+                            <button type='button' onclick='setPalettsetPalettee("forest")' class='btn btn-default'>
                                 <span class="glyphicon glyphicon-leaf" aria-hidden="true"></span>
                                 Forest
                             </button>
@@ -183,6 +183,7 @@ const char MAIN_page[] = R"=====(
                 </div>
             </div>
         </div>
+        <!-- <iframe src="https://giphy.com/embed/21GCae4djDWtP5soiY" width="384" height="480" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/reaction-dog-omg-21GCae4djDWtP5soiY">via GIPHY</a></p> -->
     </div>
 </body>
 

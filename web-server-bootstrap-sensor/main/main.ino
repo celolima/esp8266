@@ -20,7 +20,7 @@
 #define PASSWORD "4BDB14C2"
 
 #define LED_PIN     5
-#define NUM_LEDS    4
+#define NUM_LEDS    120
 #define BRIGHTNESS  255
 #define LED_TYPE    WS2811
 #define COLOR_ORDER GRB
@@ -45,6 +45,13 @@ String ledButton = "OFF";
 boolean isPalette = true;
 int colorChoosen = 0;
 
+int LEDS_SAME_TIME = 1; // define quantos leds serao acesos ao mesmo tempo
+int LEDS_UPDATE_DELAY = 20; // Delay dos leds durante atualização
+
+boolean isChanged = false;
+
+String choosenPalette = "";
+
 void setup() {
   Serial.begin(115200);
   Serial.println(" --- Inicializando a aplicação ESP8266 --- ");
@@ -57,7 +64,7 @@ void setup() {
 void loop() {
   MDNS.update();
   server.handleClient();
-  //showLED();
+  showLED();
 }
 
 /*------------------------------------------------------HTTP------------------------------------------------------*/
@@ -92,10 +99,31 @@ void setupWifi() {
   server.on("/readTemp", handleTemp);
   server.on("/readHum", handleHum);
   server.on("/changePalette", handleChangePalette);
+  server.on("/setConfig", handleConfig);
   server.begin();
   Serial.println("HTTP server started");
 
   MDNS.addService("http", "tcp", 80);
+}
+
+//setConfig?tot=1&velocity=260'
+void handleConfig() {  
+  String t_totalLeds = server.arg("tot");
+  String t_velocity = server.arg("velocity");
+  
+  if(t_totalLeds != "") {
+    int tot = t_totalLeds.toInt();
+    if(tot > 0 && tot < 11) {
+      LEDS_SAME_TIME = tot;
+    }
+  }
+  
+  if(t_velocity != "") {
+    int vel = t_velocity.toInt();
+    if(vel >= 20 && vel <= 500) {
+      LEDS_UPDATE_DELAY = vel;
+    }
+  }
 }
 
 void handleLED() {
@@ -163,20 +191,33 @@ void setupLEDStrip() {
 }
 
 void showLED() {
+  if(choosenPalette == "shutdown") {
+    return;
+  }
   uint8_t colorIndex = 1;
   for( int i = 0; i < NUM_LEDS; i++) {
-    if(isPalette) {
-      leds[i] = ColorFromPalette(currentPalette, colorIndex, BRIGHTNESS, LINEARBLEND);
-      colorIndex += 4;
-    } else {
-      leds[i] = colorChoosen;
-    }    
-  }
-  FastLED.show();
+    if(i + LEDS_SAME_TIME < NUM_LEDS) { // Previne preencher bits nao validos
+      for (int j=0;j<=LEDS_SAME_TIME;j++) {  
+          if(isChanged) {
+            isChanged = false;
+            return;
+          }
+          if(isPalette) {
+            leds[i+j] = ColorFromPalette(currentPalette, colorIndex, BRIGHTNESS, LINEARBLEND);
+            colorIndex += 4;
+          } else {
+            leds[i+j] = colorChoosen;
+          }                  
+      }
+    }
+    FastLED.show();
+    delay(LEDS_UPDATE_DELAY);
+    leds[i] = CRGB::Black;
+  }  
 }
 
 void handleChangePalette() {      
-  String choosenPalette = server.arg("palette");
+  choosenPalette = server.arg("palette");
   
   unsigned long currentMillis = 0, previousLEDMillis = 0;
   isPalette = true;
@@ -199,6 +240,7 @@ void handleChangePalette() {
   } else if(choosenPalette ==  "heat") {
       currentPalette = HeatColors_p;
   } else if(choosenPalette ==  "blink") {    
+    /*
     for( int i = 0; i < 200; i++) {
       fill_solid( currentPalette, NUM_LEDS, CRGB::Red);      
       showLED();
@@ -210,9 +252,10 @@ void handleChangePalette() {
 
       delay(700);
     }
+    */
   } else if(choosenPalette ==  "random") {
       for( int i = 0; i < NUM_LEDS; i++) {
-        currentPalette[i] = CHSV( random8(), 255, random8());
+        //currentPalette[i] = CHSV( random8(), 255, random8()); BUG!
       }
   } else if(choosenPalette ==  "shutdown") {
       fill_solid( currentPalette, NUM_LEDS, CRGB::Black);
@@ -220,7 +263,7 @@ void handleChangePalette() {
       isPalette = false;
       colorChoosen = (int)strtol(choosenPalette.c_str(), NULL, 16);
   }
-  showLED();
+  isChanged = true;
   server.send(200, "text/plane", choosenPalette);
 }
 

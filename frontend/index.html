@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html lang='pt-br'>
+    <head>
+
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/css/bootstrap-colorpicker.min.css'>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/2.5.3/js/bootstrap-colorpicker.min.js'></script>
+
+        <script>
+            $(function () {
+                $('#cp4').colorpicker({ hexNumberSignPrefix: false }).on('changeColor', function (e) {
+                    document.getElementById('choosenPalette').style.color = e.color.toString('rgba');
+                    setPalette(e.color.toString());
+                });
+            });
+            $(function () {
+                $('#demo').colorpicker();
+
+                $('input[type=range]').on('input', function () {
+                $(this).trigger('change');
+                $("#brightnesslabel").html($(this).val());
+            });
+            });
+            // Change LED Status
+            function setLED(led) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('ledState').innerHTML = this.responseText;
+                    }
+                };
+                xhttp.open('GET', 'setLED?ledState=' + led, true);
+                xhttp.send();
+            }
+            // Set LED Configs
+            function setConfig() {
+                var xhttp = new XMLHttpRequest();
+                let totLeds = document.getElementById('totalLeds').value;
+                let velocity = document.getElementById('inputRange').value;
+                xhttp.open('GET', 'setConfig?tot=' + totLeds + '&velocity=' + velocity, true);
+                xhttp.send();
+            }
+            // Change Color Palette Led Strip
+            function setPalette(palette) {
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById('choosenPalette').innerHTML = this.responseText;
+                    }
+                };
+                xhttp.open('GET', 'changePalette?palette=' + palette, true);
+                xhttp.send();
+            }
+            // Call a function repetatively with 2 Second interval
+            /*
+            setInterval(function() {
+                getData("T");
+                getData("H");
+            }, 2000); //2000mSeconds update rate
+            */
+            function getData(sensor) {
+                var xhttp = new XMLHttpRequest();
+                let idSensor = sensor === 'T' ? 'temp' : 'humidity';
+                let sensorMethod = sensor === 'T' ? 'readTemp' : 'readHum';
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        document.getElementById(idSensor).innerHTML = this.responseText;
+                    }
+                };
+                xhttp.open('GET', sensorMethod, true);
+                xhttp.send();
+            }
+        </script>
+        <title>Control Station</title>
+    </head>
+    <body>
+        <div class="container my-5">
+            <h1 class="text-primary">Controle da Fita de LED</h1>
+            <div class="row my-5">
+                <div class="col-12 box-shadow bg-light py-3">
+                    <h2>Palette Choosen <span id="choosenPalette" class="badge badge-success">Novo</span></h2>
+                    <button type="button" onclick="setPalette('cloud')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-cloud" aria-hidden="true"></span>
+                        Cloud
+                    </button>
+                    <button type="button" onclick="setPalette('lava')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-fire" aria-hidden="true"></span>
+                        Lava
+                    </button>
+                    <button type="button" onclick="setPalette('ocean')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-tint" aria-hidden="true"></span>
+                        Ocean
+                    </button>
+                    <button type="button" onclick="setPalette('forest')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-leaf" aria-hidden="true"></span>
+                        Forest
+                    </button>
+                    <button type="button" onclick="setPalette('rainbow')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-eye-open" aria-hidden="true"></span>
+                        Rainbow
+                    </button>
+                    <button type="button" onclick="setPalette('rainbowStriped')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                        RainbowStriped
+                    </button>
+                    <button type="button" onclick="setPalette('party')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-music" aria-hidden="true"></span>
+                        Party
+                    </button>
+                    <button type="button" onclick="setPalette('heat')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+                        Heat
+                    </button>
+                    <!--
+                    <button type="button" onclick="setPalette('blink')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                        Blink
+                    </button>
+
+                    <button type="button" onclick="setPalette('random')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        Random
+                    </button>
+                    -->
+                    <button type="button" onclick="setPalette('shutdown')" class="btn btn-outline-secondary">
+                        <span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
+                        Shutdown
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 col-12 px-0">
+                    <div class="box-shadow bg-light px-1 py-3">
+                    <h4 class="text-primary">Configura&ccedil;&atilde;o</h4>
+                    <label for="inputRange">Velocidade</label>
+                    <span class="float-right badge badge-primary lbval" id="brightnesslabel">NA</span></label>
+                    <input type="range" min="20" max="500" step="5" class="form-control" id="inputRange">
+                    
+                    <label for="totalLeds">Total Leds</label>
+                    <input type="number" class="form-control mb-3" id="totalLeds" min="1" max="10" value="1">
+
+                    <button type="button" id="cp4" class="btn btn-warning btn-sm">Pick color</button>
+                    <button type="button" onclick="setConfig()" class="btn btn-success btn-sm">OK</button>
+                    </div>
+                </div>
+                <div class="col-md-6 col-12 pr-0">               
+                    <div class="box-shadow bg-light px-1 py-3">
+                    <h4 class="text-primary">Controle de LED</h4>
+                    <div class="row">
+                        <div class="col">
+                            <h5>LED <span id="ledState" class="badge badge-success">NA</span></h5>                            
+                        </div>                            
+                        <div class="col">
+                            <button type="button" onclick="setLED(1)" class="btn btn-success btn-sm">ON</button>
+                            <button type="button" onclick="setLED(0)" class="btn btn-danger btn-sm">OFF</button>
+                        </div>
+                    </div>            
+                    </div>
+                </div>
+            </div>        
+        </div>
+    </body>
+</html>
